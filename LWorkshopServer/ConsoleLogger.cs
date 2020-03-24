@@ -9,9 +9,9 @@ namespace LWorkshopServer
     public static class ConsoleLogger
     {
 
-        public static void Write(string message, string type, Form1 form)
+        public static void Write(string message, int type, Form1 form)
         {
-            if (type == "server")
+            if (type == 0)
             {
                 form.rtbMain.Text += $"[SERVER] {DateTime.Now.ToLongTimeString()}: {message}\n";
             }

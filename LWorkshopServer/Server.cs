@@ -1,21 +1,19 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Data.Entity;
-using Newtonsoft.Json;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
-
-namespace LWorkshopServer 
+namespace LWorkshopServer
 {
-    public class Server 
+    public class Server
     {
         private Form1 formMain;
         private TcpListener _listener;
         private List<Book> books;
+        private List<User> users;
 
 
         private string _ip;
@@ -26,107 +24,125 @@ namespace LWorkshopServer
             _ip = ip;
             _port = port;
             this.formMain = formMain;
-        }
-        private static readonly string ServerResponseString = "чё те надо блять";
-        private static readonly byte[] ServerResponseBytes = Encoding.UTF8.GetBytes(ServerResponseString);
-
-        private static readonly string ClientRequestString = "get users";
-        private static readonly byte[] ClientRequestBytes = Encoding.UTF8.GetBytes(ClientRequestString);
-
-        async public void Start()
-        {
             books = new List<Book>();
             for (int i = 0; i < 10; i++)
-            { 
+            {
                 Book b = new Book();
                 b.Author = "a" + 1;
                 b.Id = i;
                 b.Name = "name" + i;
-                b.NumOfBooks = i*i;
+                b.NumOfBooks = i * i;
                 b.PublishingDate = DateTime.Now;
                 books.Add(b);
             }
-            ConsoleLogger.Write("Список создан", "server", formMain);
 
+            users = new List<User>();
+            for (int i = 0; i < 10; i++)
+            {
+                User u = new User();
+                u.Id = i;
+                u.Issuances = null;
+                u.Name = "name" + i;
+                users.Add(u);
+            }
+        }
+
+        public async void Start()   //серверная часть
+        {
             TcpListener _listener = TcpListener.Create(_port);
             _listener.Start();
-            ConsoleLogger.Write("Сервер запущен", "server", formMain);
+            ConsoleLogger.Write("Сервер запущен", 0, formMain);
 
             TcpClient client = await _listener.AcceptTcpClientAsync();
-            ConsoleLogger.Write("Клиент подключился", "server", formMain);
+            ConsoleLogger.Write("Клиент подключился", 0, formMain);
             using (NetworkStream stream = client.GetStream())
             {
                 var buffer = new byte[1024];
-                ConsoleLogger.Write("Получает информацию от клиента", "server", formMain);
+                ConsoleLogger.Write("Получает информацию от клиента", 0, formMain);
                 var byteCount = await stream.ReadAsync(buffer, 0, buffer.Length);
-                var request = Encoding.UTF8.GetString(buffer, 0, byteCount);
-                ConsoleLogger.Write($"Клиент отправил сообщение '{request}'", "server", formMain);
-                byte[] responseBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(books).ToString());
-                await stream.WriteAsync(responseBytes, 0, responseBytes.Length);
-                ConsoleLogger.Write($"Ответ отправлен","server", formMain);
-            }  
-        }
+                string clientRequest = Encoding.UTF8.GetString(buffer, 0, byteCount);
+                ConsoleLogger.Write($"Клиент отправил сообщение '{clientRequest}'", 0, formMain);
 
-        public async void Client()
-        {
-            List<Book> booksClient = new List<Book>();
-            using (var client = new TcpClient())
-            {
-                ConsoleLogger.Write("Подключение к серверу", "client", formMain);
-                await client.ConnectAsync(IPAddress.Parse(_ip), _port);
-                ConsoleLogger.Write("Успешно подключён", "client", formMain);
-                using (var networkStream = client.GetStream())
+                //обработчик запроса сюды//
+
+                if (clientRequest.Contains("get"))
                 {
-                    ConsoleLogger.Write("Oтправка сообщения", "client", formMain);
-                    await networkStream.WriteAsync(ClientRequestBytes, 0, ClientRequestBytes.Length);
-                    var buffer = new byte[4096];
-                    var byteCount = await networkStream.ReadAsync(buffer, 0, buffer.Length);
-                    var response = Encoding.UTF8.GetString(buffer, 0, byteCount);
-                    booksClient = JsonConvert.DeserializeObject<List<Book>>(response);
-                    formMain.dgMain.DataSource = booksClient;
-
-                   // ConsoleLogger.Write("Oтвет сервера: "+ response, "client", formMain);
+                    if (clientRequest.Contains("books"))
+                    {
+                        SendBooksList(stream);
+                    }
+                    else
+                    {
+                        SendUsersList(stream);
+                    }        
                 }
             }
         }
 
-        /*public void SendUsersList(int index)
+        public async Task<string> Client(string query)          //клиентская часть
         {
-            NetworkStream stream = clients[index].GetStream();
-            byte[] data = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(GetUsers()));
-            stream.WriteAsync(data, 0, data.Length);
-            Console.WriteLine(DateTime.Now.ToShortTimeString() + ": Отправлен список пользователей");
-            stream.Close();
-            clients[index].Close();
-            clients.Remove(clients[index]);
-        }*/
-
-       /* public void SendBooksList(int index)
-        {
-            NetworkStream stream = clients[index].GetStream();
-            byte[] data = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(GetBooks()));
-            stream.WriteAsync(data, 0, data.Length);
-            Console.WriteLine(DateTime.Now.ToShortTimeString() + ": Отправлен список книг");
-            stream.Close();
-
-        }*/
-
-        public List<User> GetUsers()
-        {
-            using (LibraryContext lb = new LibraryContext())
+            string serverResponse;
+            using (var client = new TcpClient())
             {
-                return lb.Users.ToList<User>();
+                ConsoleLogger.Write("Подключение к серверу", 1, formMain);
+                await client.ConnectAsync(IPAddress.Parse(_ip), _port);
+                ConsoleLogger.Write("Успешно подключён", 1, formMain);
+                byte[] byteQuery = Encoding.UTF8.GetBytes(query);
+                using (var networkStream = client.GetStream())
+                {
+                    ConsoleLogger.Write("Oтправка сообщения", 1, formMain);
+                    await networkStream.WriteAsync(byteQuery, 0, byteQuery.Length);
+                    var buffer = new byte[4096];
+                    var byteCount = await networkStream.ReadAsync(buffer, 0, buffer.Length);
+                    serverResponse = Encoding.UTF8.GetString(buffer, 0, byteCount);
+                    ConsoleLogger.Write("Oтвет убил: " + Encoding.UTF8.GetString(buffer, 0, byteCount), 1, formMain);
+                }
             }
-
+            return serverResponse;
         }
 
-        public List<Book> GetBooks()
-        {
-            using (LibraryContext lb = new LibraryContext())
-            {
-                return lb.Books.ToList<Book>();
-            }
-        }
+        /*  public List<User> GetUsersList(string response)     //метод для клиента
+          {
+              var booksClient = JsonConvert.DeserializeObject<List<User>>(response);
+              return booksClient;
+          }
+
+          public List<Book> GetBooksList(string response)     //метода для клиента
+          {
+              var usersClient = JsonConvert.DeserializeObject<List<Book>>(response);
+              return usersClient;
+          }*/
+
+
+         public async void SendBooksList(NetworkStream stream)       //метод для сервера
+         {
+             byte[] responseBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(books).ToString());
+             await stream.WriteAsync(responseBytes, 0, responseBytes.Length);
+             ConsoleLogger.Write($"Отправлен список книг", 0, formMain);
+         }
+
+         public async void SendUsersList(NetworkStream stream)           //метод для сервера
+         {
+             byte[] responseBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(users).ToString());
+             await stream.WriteAsync(responseBytes, 0, responseBytes.Length);
+             ConsoleLogger.Write($"Отправлен список пользователей", 0, formMain);
+         }
+        /*  public List<User> GetUsers()
+          {
+              using (LibraryContext lb = new LibraryContext())
+              {
+                  return lb.Users.ToList<User>();
+              }
+
+          }
+
+          public List<Book> GetBooks()
+          {
+              using (LibraryContext lb = new LibraryContext())
+              {
+                  return lb.Books.ToList<Book>();
+              }
+          }*/
 
         public void Close()
         {
