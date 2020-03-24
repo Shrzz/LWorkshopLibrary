@@ -35,11 +35,10 @@ namespace LWorkshopServer
         }
 
 
-        //сырая функция, нужно бахнуть обработку типа получаемого объекта
+        //чисто чтоб было, обработка с текстбокса
         private async void btnSendMessage_Click(object sender, EventArgs e)
         {
             string response = await server.Client(textBox1.Text);
-            ConsoleLogger.Write(response, 0, this);
         }
 
         private async void button1_Click(object sender, EventArgs e)

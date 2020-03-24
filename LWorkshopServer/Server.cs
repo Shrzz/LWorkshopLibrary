@@ -67,7 +67,7 @@ namespace LWorkshopServer
 
                 if (clientRequest.Contains("get"))
                 {
-                    if (clientRequest.Contains("books"))
+                    if (clientRequest.Contains("book"))
                     {
                         SendBooksList(stream);
                     }
@@ -101,19 +101,6 @@ namespace LWorkshopServer
             return serverResponse;
         }
 
-        /*  public List<User> GetUsersList(string response)     //метод для клиента
-          {
-              var booksClient = JsonConvert.DeserializeObject<List<User>>(response);
-              return booksClient;
-          }
-
-          public List<Book> GetBooksList(string response)     //метода для клиента
-          {
-              var usersClient = JsonConvert.DeserializeObject<List<Book>>(response);
-              return usersClient;
-          }*/
-
-
          public async void SendBooksList(NetworkStream stream)       //метод для сервера
          {
              byte[] responseBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(books).ToString());
@@ -127,6 +114,8 @@ namespace LWorkshopServer
              await stream.WriteAsync(responseBytes, 0, responseBytes.Length);
              ConsoleLogger.Write($"Отправлен список пользователей", 0, formMain);
          }
+
+        //это потом
         /*  public List<User> GetUsers()
           {
               using (LibraryContext lb = new LibraryContext())

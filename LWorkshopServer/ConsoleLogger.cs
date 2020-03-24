@@ -13,7 +13,7 @@ namespace LWorkshopServer
         {
             if (type == 0)
             {
-                form.rtbMain.Text += $"[SERVER] {DateTime.Now.ToLongTimeString()}: {message}\n";
+                form.rtbMain.Text += $"{DateTime.Now.ToLongTimeString()} [SERVER]: {message}\n";
             }
             else
             {
