@@ -36,6 +36,7 @@ namespace LWorkshopServer
             TcpListener _listener = TcpListener.Create(_port);
             _listener.Start();
             ConsoleLogger.Write("Сервер запущен", "server", formMain);
+
             TcpClient client = await _listener.AcceptTcpClientAsync();
             ConsoleLogger.Write("Клиент подключился", "server", formMain);
             using (NetworkStream stream = client.GetStream())
