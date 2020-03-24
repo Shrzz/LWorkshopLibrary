@@ -31,6 +31,7 @@
             this.rtbMain = new System.Windows.Forms.RichTextBox();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.BtnStartServer = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // rtbMain
@@ -58,11 +59,22 @@
             this.BtnStartServer.UseVisualStyleBackColor = true;
             this.BtnStartServer.Click += new System.EventHandler(this.BtnStartServer_Click);
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(548, 41);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(75, 23);
+            this.button1.TabIndex = 3;
+            this.button1.Text = "button1";
+            this.button1.UseVisualStyleBackColor = true;
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.button1);
             this.Controls.Add(this.BtnStartServer);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.rtbMain);
@@ -76,8 +88,9 @@
         #endregion
 
         public System.Windows.Forms.RichTextBox rtbMain;
-        private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Button BtnStartServer;
+        public System.Windows.Forms.TextBox textBox1;
+        public System.Windows.Forms.Button button1;
     }
 }
 

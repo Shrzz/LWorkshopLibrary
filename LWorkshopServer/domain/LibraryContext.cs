@@ -7,13 +7,12 @@ using System.Data.Entity;
 
 namespace LWorkshopServer
 {
-    class UserContext : DbContext
+    class LibraryContext : DbContext
     {
-        public UserContext() : base("DbConnection")
+        public LibraryContext() : base("DbConnection")
         {
-
         }
-
-        public DbSet<User> Users { get; set; }
+        public List<User> Users { get; set; }
+        public List<Book> Books { get; set; }
     }
 }

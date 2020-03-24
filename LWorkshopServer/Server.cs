@@ -5,6 +5,8 @@ using System.Text;
 using System.Data.Entity;
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 
 namespace LWorkshopServer 
@@ -13,10 +15,9 @@ namespace LWorkshopServer
     {
         private Form1 formMain;
         private TcpListener _listener;
-        private List<TcpClient> clients;
+
         private string _ip;
         private int _port;
-        private readonly int _connectionsAmount = 10;
 
         public Server(string ip, int port, Form1 formMain)
         {
@@ -24,38 +25,51 @@ namespace LWorkshopServer
             _port = port;
             this.formMain = formMain;
         }
+        private static readonly string ServerResponseString = "чё те надо блять";
+        private static readonly byte[] ServerResponseBytes = Encoding.UTF8.GetBytes(ServerResponseString);
 
-        public void Start()
+        private static readonly string ClientRequestString = "get users";
+        private static readonly byte[] ClientRequestBytes = Encoding.UTF8.GetBytes(ClientRequestString);
+
+        async public void Start()
         {
-            TcpListener t = new TcpListener(IPAddress.Parse(_ip), _port);
-            t.Start(_connectionsAmount);
-            t.AcceptTcpClientAsync();
-            formMain.rtbMain.Text += DateTime.Now.ToShortTimeString() + ": Сервер запущен для " + _connectionsAmount + "соединений";
-            clients = new List<TcpClient>();
-        }
-
-        public void GetQuery()   ////////////////
-        {
-            TcpClient client = _listener.AcceptTcpClient();
-            clients.Add(client);
-            Console.WriteLine(DateTime.Now.ToShortTimeString() + "Клиент подключен");
-            NetworkStream stream = client.GetStream();
-
-            byte[] buffer = new byte[1024];
-            int bytes = 0;
-            StringBuilder builder = new StringBuilder();
-
-            do
+            TcpListener _listener = TcpListener.Create(_port);
+            _listener.Start();
+            ConsoleLogger.Write("Сервер запущен", "server", formMain);
+            TcpClient client = await _listener.AcceptTcpClientAsync();
+            ConsoleLogger.Write("Клиент подключился", "server", formMain);
+            using (NetworkStream stream = client.GetStream())
             {
-                bytes = stream.Read(buffer, 0, buffer.Length);
-                builder.Append(Encoding.Unicode.GetString(buffer, 0, bytes));
-            }
-            while (stream.DataAvailable);
-
-            formMain.rtbMain.Text += ("Получено " + DateTime.Now.ToShortTimeString() + ": " + builder.ToString());
+                var buffer = new byte[1024];
+                ConsoleLogger.Write("Получает информацию от клиента", "server", formMain);
+                var byteCount = await stream.ReadAsync(buffer, 0, buffer.Length);
+                var request = Encoding.UTF8.GetString(buffer, 0, byteCount);
+                ConsoleLogger.Write($"Клиент отправил сообщение '{request}'", "server", formMain);
+                await stream.WriteAsync(ServerResponseBytes, 0, ServerResponseBytes.Length);
+                ConsoleLogger.Write($"Ответ отправлен","server", formMain);
+            }  
         }
 
-        public void SendUsersList(int index)
+        public async void Client()
+        {
+            using (var client = new TcpClient())
+            {
+                ConsoleLogger.Write("Подключение к серверу", "client", formMain);
+                await client.ConnectAsync(IPAddress.Parse(_ip), _port);
+                ConsoleLogger.Write("Успешно подключён", "client", formMain);
+                using (var networkStream = client.GetStream())
+                {
+                    ConsoleLogger.Write("Oтправка сообщения", "client", formMain);
+                    await networkStream.WriteAsync(ClientRequestBytes, 0, ClientRequestBytes.Length);
+                    var buffer = new byte[4096];
+                    var byteCount = await networkStream.ReadAsync(buffer, 0, buffer.Length);
+                    var response = Encoding.UTF8.GetString(buffer, 0, byteCount);
+                    ConsoleLogger.Write("Oтвет сервера: "+ response, "client", formMain);
+                }
+            }
+        }
+
+        /*public void SendUsersList(int index)
         {
             NetworkStream stream = clients[index].GetStream();
             byte[] data = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(GetUsers()));
@@ -64,35 +78,38 @@ namespace LWorkshopServer
             stream.Close();
             clients[index].Close();
             clients.Remove(clients[index]);
-        }
+        }*/
 
-        public void SendBooksList(int index)
+       /* public void SendBooksList(int index)
         {
             NetworkStream stream = clients[index].GetStream();
             byte[] data = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(GetBooks()));
             stream.WriteAsync(data, 0, data.Length);
             Console.WriteLine(DateTime.Now.ToShortTimeString() + ": Отправлен список книг");
             stream.Close();
-            clients[index].Close();
-            clients.Remove(clients[index]);
-        }
 
-        public DbSet<User> GetUsers()
+        }*/
+
+        public List<User> GetUsers()
         {
-            using (UserContext uc = new UserContext())
+            using (LibraryContext lb = new LibraryContext())
             {
-                return uc.Users;
+                return lb.Users.ToList<User>();
             }
 
         }
 
-        public DbSet<Book> GetBooks()
+        public List<Book> GetBooks()
         {
-            using (BookContext bc = new BookContext())
+            using (LibraryContext lb = new LibraryContext())
             {
-                return bc.Books;
+                return lb.Books.ToList<Book>();
             }
         }
 
+        public void Close()
+        {
+            _listener.Stop();
+        }
     }
 }
