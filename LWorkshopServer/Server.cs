@@ -15,6 +15,8 @@ namespace LWorkshopServer
     {
         private Form1 formMain;
         private TcpListener _listener;
+        private List<Book> books;
+
 
         private string _ip;
         private int _port;
@@ -33,6 +35,19 @@ namespace LWorkshopServer
 
         async public void Start()
         {
+            books = new List<Book>();
+            for (int i = 0; i < 10; i++)
+            { 
+                Book b = new Book();
+                b.Author = "a" + 1;
+                b.Id = i;
+                b.Name = "name" + i;
+                b.NumOfBooks = i*i;
+                b.PublishingDate = DateTime.Now;
+                books.Add(b);
+            }
+            ConsoleLogger.Write("Список создан", "server", formMain);
+
             TcpListener _listener = TcpListener.Create(_port);
             _listener.Start();
             ConsoleLogger.Write("Сервер запущен", "server", formMain);
@@ -46,13 +61,15 @@ namespace LWorkshopServer
                 var byteCount = await stream.ReadAsync(buffer, 0, buffer.Length);
                 var request = Encoding.UTF8.GetString(buffer, 0, byteCount);
                 ConsoleLogger.Write($"Клиент отправил сообщение '{request}'", "server", formMain);
-                await stream.WriteAsync(ServerResponseBytes, 0, ServerResponseBytes.Length);
+                byte[] responseBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(books).ToString());
+                await stream.WriteAsync(responseBytes, 0, responseBytes.Length);
                 ConsoleLogger.Write($"Ответ отправлен","server", formMain);
             }  
         }
 
         public async void Client()
         {
+            List<Book> booksClient = new List<Book>();
             using (var client = new TcpClient())
             {
                 ConsoleLogger.Write("Подключение к серверу", "client", formMain);
@@ -65,7 +82,10 @@ namespace LWorkshopServer
                     var buffer = new byte[4096];
                     var byteCount = await networkStream.ReadAsync(buffer, 0, buffer.Length);
                     var response = Encoding.UTF8.GetString(buffer, 0, byteCount);
-                    ConsoleLogger.Write("Oтвет сервера: "+ response, "client", formMain);
+                    booksClient = JsonConvert.DeserializeObject<List<Book>>(response);
+                    formMain.dgMain.DataSource = booksClient;
+
+                   // ConsoleLogger.Write("Oтвет сервера: "+ response, "client", formMain);
                 }
             }
         }

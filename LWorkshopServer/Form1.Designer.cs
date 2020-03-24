@@ -32,6 +32,8 @@
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.BtnStartServer = new System.Windows.Forms.Button();
             this.button1 = new System.Windows.Forms.Button();
+            this.dgMain = new System.Windows.Forms.DataGridView();
+            ((System.ComponentModel.ISupportInitialize)(this.dgMain)).BeginInit();
             this.SuspendLayout();
             // 
             // rtbMain
@@ -69,17 +71,29 @@
             this.button1.UseVisualStyleBackColor = true;
             this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
+            // dgMain
+            // 
+            this.dgMain.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgMain.Location = new System.Drawing.Point(564, 82);
+            this.dgMain.Name = "dgMain";
+            this.dgMain.RowHeadersWidth = 51;
+            this.dgMain.RowTemplate.Height = 24;
+            this.dgMain.Size = new System.Drawing.Size(328, 246);
+            this.dgMain.TabIndex = 4;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(1030, 450);
+            this.Controls.Add(this.dgMain);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.BtnStartServer);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.rtbMain);
             this.Name = "Form1";
             this.Text = "Form1";
+            ((System.ComponentModel.ISupportInitialize)(this.dgMain)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -91,6 +105,7 @@
         private System.Windows.Forms.Button BtnStartServer;
         public System.Windows.Forms.TextBox textBox1;
         public System.Windows.Forms.Button button1;
+        public System.Windows.Forms.DataGridView dgMain;
     }
 }
 
