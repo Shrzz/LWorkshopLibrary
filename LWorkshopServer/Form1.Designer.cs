@@ -30,10 +30,10 @@
         {
             this.rtbMain = new System.Windows.Forms.RichTextBox();
             this.textBox1 = new System.Windows.Forms.TextBox();
-            this.button1 = new System.Windows.Forms.Button();
+            this.btnGetUsersList = new System.Windows.Forms.Button();
             this.dgMain = new System.Windows.Forms.DataGridView();
-            this.btn2 = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
+            this.btn2GridClear = new System.Windows.Forms.Button();
+            this.btnGetBooksList = new System.Windows.Forms.Button();
             this.btnSendMessage = new System.Windows.Forms.Button();
             this.btnClearLog = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dgMain)).BeginInit();
@@ -54,15 +54,15 @@
             this.textBox1.Size = new System.Drawing.Size(385, 22);
             this.textBox1.TabIndex = 1;
             // 
-            // button1
+            // btnGetUsersList
             // 
-            this.button1.Location = new System.Drawing.Point(548, 12);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(166, 23);
-            this.button1.TabIndex = 3;
-            this.button1.Text = "Получить лист users";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
+            this.btnGetUsersList.Location = new System.Drawing.Point(548, 12);
+            this.btnGetUsersList.Name = "btnGetUsersList";
+            this.btnGetUsersList.Size = new System.Drawing.Size(166, 23);
+            this.btnGetUsersList.TabIndex = 3;
+            this.btnGetUsersList.Text = "Получить лист users";
+            this.btnGetUsersList.UseVisualStyleBackColor = true;
+            this.btnGetUsersList.Click += new System.EventHandler(this.btnGetUsersList_Click);
             // 
             // dgMain
             // 
@@ -74,25 +74,25 @@
             this.dgMain.Size = new System.Drawing.Size(470, 281);
             this.dgMain.TabIndex = 4;
             // 
-            // btn2
+            // btn2GridClear
             // 
-            this.btn2.Location = new System.Drawing.Point(548, 70);
-            this.btn2.Name = "btn2";
-            this.btn2.Size = new System.Drawing.Size(166, 23);
-            this.btn2.TabIndex = 5;
-            this.btn2.Text = "Очистить грид";
-            this.btn2.UseVisualStyleBackColor = true;
-            this.btn2.Click += new System.EventHandler(this.btn2_Click);
+            this.btn2GridClear.Location = new System.Drawing.Point(548, 70);
+            this.btn2GridClear.Name = "btn2GridClear";
+            this.btn2GridClear.Size = new System.Drawing.Size(166, 23);
+            this.btn2GridClear.TabIndex = 5;
+            this.btn2GridClear.Text = "Очистить грид";
+            this.btn2GridClear.UseVisualStyleBackColor = true;
+            this.btn2GridClear.Click += new System.EventHandler(this.btnClearGrid_Click);
             // 
-            // button2
+            // btnGetBooksList
             // 
-            this.button2.Location = new System.Drawing.Point(548, 41);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(166, 23);
-            this.button2.TabIndex = 6;
-            this.button2.Text = "Получить лист books";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
+            this.btnGetBooksList.Location = new System.Drawing.Point(548, 41);
+            this.btnGetBooksList.Name = "btnGetBooksList";
+            this.btnGetBooksList.Size = new System.Drawing.Size(166, 23);
+            this.btnGetBooksList.TabIndex = 6;
+            this.btnGetBooksList.Text = "Получить лист books";
+            this.btnGetBooksList.UseVisualStyleBackColor = true;
+            this.btnGetBooksList.Click += new System.EventHandler(this.btnGetBooksList_Click);
             // 
             // btnSendMessage
             // 
@@ -121,10 +121,10 @@
             this.ClientSize = new System.Drawing.Size(1030, 450);
             this.Controls.Add(this.btnClearLog);
             this.Controls.Add(this.btnSendMessage);
-            this.Controls.Add(this.button2);
-            this.Controls.Add(this.btn2);
+            this.Controls.Add(this.btnGetBooksList);
+            this.Controls.Add(this.btn2GridClear);
             this.Controls.Add(this.dgMain);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.btnGetUsersList);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.rtbMain);
             this.Name = "Form1";
@@ -139,10 +139,10 @@
 
         public System.Windows.Forms.RichTextBox rtbMain;
         public System.Windows.Forms.TextBox textBox1;
-        public System.Windows.Forms.Button button1;
+        public System.Windows.Forms.Button btnGetUsersList;
         public System.Windows.Forms.DataGridView dgMain;
-        private System.Windows.Forms.Button btn2;
-        public System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button btn2GridClear;
+        public System.Windows.Forms.Button btnGetBooksList;
         private System.Windows.Forms.Button btnSendMessage;
         private System.Windows.Forms.Button btnClearLog;
     }

@@ -49,39 +49,45 @@ namespace LWorkshopServer
 
         public async void Start()   //серверная часть
         {
-            TcpListener _listener = TcpListener.Create(_port);
+            _listener = TcpListener.Create(_port);
             _listener.Start();
             ConsoleLogger.Write("Сервер запущен", 0, formMain);
 
-            TcpClient client = await _listener.AcceptTcpClientAsync();
-            ConsoleLogger.Write("Клиент подключился", 0, formMain);
-            using (NetworkStream stream = client.GetStream())
+            while (true)
             {
-                var buffer = new byte[1024];
-                ConsoleLogger.Write("Получает информацию от клиента", 0, formMain);
-                var byteCount = await stream.ReadAsync(buffer, 0, buffer.Length);
-                string clientRequest = Encoding.UTF8.GetString(buffer, 0, byteCount);
-                ConsoleLogger.Write($"Клиент отправил сообщение '{clientRequest}'", 0, formMain);
-
-                //обработчик запроса сюды//
-
-                if (clientRequest.Contains("get"))
+                TcpClient client = await _listener.AcceptTcpClientAsync();
+                ConsoleLogger.Write("Клиент подключился", 0, formMain);
+                using (NetworkStream stream = client.GetStream())
                 {
-                    if (clientRequest.Contains("book"))
+                    var buffer = new byte[1024];
+                    ConsoleLogger.Write("Получает информацию от клиента", 0, formMain);
+                    var byteCount = await stream.ReadAsync(buffer, 0, buffer.Length);
+                    string clientRequest = Encoding.UTF8.GetString(buffer, 0, byteCount);
+                    ConsoleLogger.Write($"Клиент отправил сообщение '{clientRequest}'", 0, formMain);
+
+                    //обработчик запроса сюды//
+
+                    if (clientRequest.Contains("get"))
                     {
-                        SendBooksList(stream);
+                        if (clientRequest.Contains("book"))
+                        {
+                            SendBooksList(stream);
+                        }
+                        else
+                        {
+                            SendUsersList(stream);
+                        }
                     }
-                    else
-                    {
-                        SendUsersList(stream);
-                    }        
                 }
+                client.Close();
+                client.Dispose();
             }
+
         }
 
         public async Task<string> Client(string query)          //клиентская часть
         {
-            string serverResponse;
+            string serverResponse = "";
             using (var client = new TcpClient())
             {
                 ConsoleLogger.Write("Подключение к серверу", 1, formMain);
@@ -92,8 +98,8 @@ namespace LWorkshopServer
                 {
                     ConsoleLogger.Write("Oтправка сообщения", 1, formMain);
                     await networkStream.WriteAsync(byteQuery, 0, byteQuery.Length);
-                    var buffer = new byte[4096];
-                    var byteCount = await networkStream.ReadAsync(buffer, 0, buffer.Length);
+                    var buffer = new byte[2048];
+                    var byteCount = await networkStream.ReadAsync(buffer, 0, buffer.Length);   
                     serverResponse = Encoding.UTF8.GetString(buffer, 0, byteCount);
                     ConsoleLogger.Write("Oтвет убил: " + Encoding.UTF8.GetString(buffer, 0, byteCount), 1, formMain);
                 }
@@ -104,14 +110,14 @@ namespace LWorkshopServer
          public async void SendBooksList(NetworkStream stream)       //метод для сервера
          {
              byte[] responseBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(books).ToString());
-             await stream.WriteAsync(responseBytes, 0, responseBytes.Length);
+             stream.Write(responseBytes, 0, responseBytes.Length);      //был асинхронным
              ConsoleLogger.Write($"Отправлен список книг", 0, formMain);
          }
 
          public async void SendUsersList(NetworkStream stream)           //метод для сервера
          {
              byte[] responseBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(users).ToString());
-             await stream.WriteAsync(responseBytes, 0, responseBytes.Length);
+             stream.Write(responseBytes, 0, responseBytes.Length);          //был асинхронным
              ConsoleLogger.Write($"Отправлен список пользователей", 0, formMain);
          }
 
