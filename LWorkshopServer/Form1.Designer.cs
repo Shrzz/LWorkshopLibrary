@@ -43,6 +43,7 @@
             // 
             this.rtbMain.Location = new System.Drawing.Point(12, 12);
             this.rtbMain.Name = "rtbMain";
+            this.rtbMain.ReadOnly = true;
             this.rtbMain.Size = new System.Drawing.Size(530, 368);
             this.rtbMain.TabIndex = 0;
             this.rtbMain.Text = "";
@@ -62,7 +63,7 @@
             this.btnGetUsersList.TabIndex = 3;
             this.btnGetUsersList.Text = "Получить лист users";
             this.btnGetUsersList.UseVisualStyleBackColor = true;
-            this.btnGetUsersList.Click += new System.EventHandler(this.btnGetUsersList_Click);
+            this.btnGetUsersList.Click += new System.EventHandler(this.BtnGetUsersList_Click);
             // 
             // dgMain
             // 
@@ -82,7 +83,7 @@
             this.btn2GridClear.TabIndex = 5;
             this.btn2GridClear.Text = "Очистить грид";
             this.btn2GridClear.UseVisualStyleBackColor = true;
-            this.btn2GridClear.Click += new System.EventHandler(this.btnClearGrid_Click);
+            this.btn2GridClear.Click += new System.EventHandler(this.BtnClearGrid_Click);
             // 
             // btnGetBooksList
             // 
@@ -92,7 +93,7 @@
             this.btnGetBooksList.TabIndex = 6;
             this.btnGetBooksList.Text = "Получить лист books";
             this.btnGetBooksList.UseVisualStyleBackColor = true;
-            this.btnGetBooksList.Click += new System.EventHandler(this.btnGetBooksList_Click);
+            this.btnGetBooksList.Click += new System.EventHandler(this.BtnGetBooksList_Click);
             // 
             // btnSendMessage
             // 
@@ -102,7 +103,7 @@
             this.btnSendMessage.TabIndex = 7;
             this.btnSendMessage.Text = "Отправить";
             this.btnSendMessage.UseVisualStyleBackColor = true;
-            this.btnSendMessage.Click += new System.EventHandler(this.btnSendMessage_Click);
+            this.btnSendMessage.Click += new System.EventHandler(this.BtnSendMessage_Click);
             // 
             // btnClearLog
             // 
@@ -112,7 +113,7 @@
             this.btnClearLog.TabIndex = 8;
             this.btnClearLog.Text = "Очистить лог";
             this.btnClearLog.UseVisualStyleBackColor = true;
-            this.btnClearLog.Click += new System.EventHandler(this.btnClearLog_Click);
+            this.btnClearLog.Click += new System.EventHandler(this.BtnClearLog_Click);
             // 
             // Form1
             // 

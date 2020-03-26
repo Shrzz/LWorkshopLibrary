@@ -16,8 +16,7 @@ namespace LWorkshopServer
     public partial class Form1 : Form
     {
         Server server;
-        List<Book> books = new List<Book>();
-        List<User> users = new List<User>();
+        
         public Form1()
         {
             InitializeComponent();
@@ -25,7 +24,7 @@ namespace LWorkshopServer
             server.Start();
         }
 
-        private void btnClearGrid_Click(object sender, EventArgs e)
+        private void BtnClearGrid_Click(object sender, EventArgs e)
         {
             dgMain.DataSource = null; 
             while (dgMain.Rows.Count > 0)
@@ -36,26 +35,26 @@ namespace LWorkshopServer
 
 
         //чисто чтоб было, обработка с текстбокса
-        private async void btnSendMessage_Click(object sender, EventArgs e)
+        private async void BtnSendMessage_Click(object sender, EventArgs e)
         {
             string response = await server.Client(textBox1.Text);
         }
 
-        private async void btnGetUsersList_Click(object sender, EventArgs e)
+        private async void BtnGetUsersList_Click(object sender, EventArgs e)
         {
             string response = await server.Client("get users");
             var result = JsonConvert.DeserializeObject(response);
             dgMain.DataSource = result;
         }
 
-        private async void btnGetBooksList_Click(object sender, EventArgs e)
+        private async void BtnGetBooksList_Click(object sender, EventArgs e)
         {
             string response = await server.Client("get books");
             var result = JsonConvert.DeserializeObject(response);
             dgMain.DataSource = result;
         }
 
-        private void btnClearLog_Click(object sender, EventArgs e)
+        private void BtnClearLog_Click(object sender, EventArgs e)
         {
             rtbMain.Text = "";
         }

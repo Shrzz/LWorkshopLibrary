@@ -1,21 +1,18 @@
-﻿using System;
+﻿using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 
 namespace LWorkshopServer
 {
     public class Server
     {
+        LibraryContext lb = new LibraryContext();
         private Form1 formMain;
         private TcpListener _listener;
-        private List<Book> books;
-        private List<User> users;
-
-
         private string _ip;
         private int _port;
 
@@ -24,27 +21,6 @@ namespace LWorkshopServer
             _ip = ip;
             _port = port;
             this.formMain = formMain;
-            books = new List<Book>();
-            for (int i = 0; i < 10; i++)
-            {
-                Book b = new Book();
-                b.Author = "a" + 1;
-                b.Id = i;
-                b.Name = "name" + i;
-                b.NumOfBooks = i * i;
-                b.PublishingDate = DateTime.Now;
-                books.Add(b);
-            }
-
-            users = new List<User>();
-            for (int i = 0; i < 10; i++)
-            {
-                User u = new User();
-                u.Id = i;
-                u.Issuances = null;
-                u.Name = "name" + i;
-                users.Add(u);
-            }
         }
 
         public async void Start()   //серверная часть
@@ -79,10 +55,7 @@ namespace LWorkshopServer
                         }
                     }
                 }
-                client.Close();
-                client.Dispose();
             }
-
         }
 
         public async Task<string> Client(string query)          //клиентская часть
@@ -99,7 +72,7 @@ namespace LWorkshopServer
                     ConsoleLogger.Write("Oтправка сообщения", 1, formMain);
                     await networkStream.WriteAsync(byteQuery, 0, byteQuery.Length);
                     var buffer = new byte[2048];
-                    var byteCount = await networkStream.ReadAsync(buffer, 0, buffer.Length);   
+                    var byteCount = await networkStream.ReadAsync(buffer, 0, buffer.Length);
                     serverResponse = Encoding.UTF8.GetString(buffer, 0, byteCount);
                     ConsoleLogger.Write("Oтвет убил: " + Encoding.UTF8.GetString(buffer, 0, byteCount), 1, formMain);
                 }
@@ -107,37 +80,29 @@ namespace LWorkshopServer
             return serverResponse;
         }
 
-         public async void SendBooksList(NetworkStream stream)       //метод для сервера
-         {
-             byte[] responseBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(books).ToString());
-             stream.Write(responseBytes, 0, responseBytes.Length);      //был асинхронным
-             ConsoleLogger.Write($"Отправлен список книг", 0, formMain);
-         }
+        public void SendBooksList(NetworkStream stream)       //метод для сервера
+        {
+            byte[] responseBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(GetBooksList()));
+            stream.Write(responseBytes, 0, responseBytes.Length);      //был асинхронным
+            ConsoleLogger.Write($"Отправлен список книг", 0, formMain);
+        }
 
-         public async void SendUsersList(NetworkStream stream)           //метод для сервера
-         {
-             byte[] responseBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(users).ToString());
-             stream.Write(responseBytes, 0, responseBytes.Length);          //был асинхронным
-             ConsoleLogger.Write($"Отправлен список пользователей", 0, formMain);
-         }
+        public void SendUsersList(NetworkStream stream)           //метод для сервера
+        {
+            byte[] responseBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(GetUsersList()));
+            stream.Write(responseBytes, 0, responseBytes.Length);          //был асинхронным
+            ConsoleLogger.Write($"Отправлен список пользователей", 0, formMain);
+        }
 
-        //это потом
-        /*  public List<User> GetUsers()
-          {
-              using (LibraryContext lb = new LibraryContext())
-              {
-                  return lb.Users.ToList<User>();
-              }
+        public List<User> GetUsersList()
+        {
+            return lb.Users.ToList();
+        }
 
-          }
-
-          public List<Book> GetBooks()
-          {
-              using (LibraryContext lb = new LibraryContext())
-              {
-                  return lb.Books.ToList<Book>();
-              }
-          }*/
+        public List<Book> GetBooksList()
+        {
+            return lb.Books.ToList();
+        }
 
         public void Close()
         {

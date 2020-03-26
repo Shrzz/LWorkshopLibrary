@@ -12,7 +12,7 @@ namespace LWorkshopServer
         public LibraryContext() : base("DbConnection")
         {
         }
-        public List<User> Users { get; set; }
-        public List<Book> Books { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<Book> Books { get; set; }
     }
 }
