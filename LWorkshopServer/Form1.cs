@@ -34,22 +34,25 @@ namespace LWorkshopServer
         }
 
 
-        //чисто чтоб было, обработка с текстбокса
+        //обработка запроса из текстбокса
         private async void BtnSendMessage_Click(object sender, EventArgs e)
         {
-            string response = await server.Client(textBox1.Text);
+            Client c = new Client(this, "127.0.0.1", 708);
+            string response = await c.SendMessage(textBox1.Text);
         }
 
         private async void BtnGetUsersList_Click(object sender, EventArgs e)
         {
-            string response = await server.Client("get users");
+            Client c = new Client(this, "127.0.0.1", 708);
+            string response = await c.SendMessage("get users");
             var result = JsonConvert.DeserializeObject(response);
             dgMain.DataSource = result;
         }
 
         private async void BtnGetBooksList_Click(object sender, EventArgs e)
         {
-            string response = await server.Client("get books");
+            Client c = new Client(this, "127.0.0.1", 708);
+            string response = await c.SendMessage("get books");
             var result = JsonConvert.DeserializeObject(response);
             dgMain.DataSource = result;
         }

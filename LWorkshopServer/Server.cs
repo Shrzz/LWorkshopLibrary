@@ -58,28 +58,7 @@ namespace LWorkshopServer
             }
         }
 
-        public async Task<string> Client(string query)          //клиентская часть
-        {
-            string serverResponse = "";
-            using (var client = new TcpClient())
-            {
-                ConsoleLogger.Write("Подключение к серверу", 1, formMain);
-                await client.ConnectAsync(IPAddress.Parse(_ip), _port);
-                ConsoleLogger.Write("Успешно подключён", 1, formMain);
-                byte[] byteQuery = Encoding.UTF8.GetBytes(query);
-                using (var networkStream = client.GetStream())
-                {
-                    ConsoleLogger.Write("Oтправка сообщения", 1, formMain);
-                    await networkStream.WriteAsync(byteQuery, 0, byteQuery.Length);
-                    var buffer = new byte[2048];
-                    var byteCount = await networkStream.ReadAsync(buffer, 0, buffer.Length);
-                    serverResponse = Encoding.UTF8.GetString(buffer, 0, byteCount);
-                    ConsoleLogger.Write("Oтвет убил: " + Encoding.UTF8.GetString(buffer, 0, byteCount), 1, formMain);
-                }
-            }
-            return serverResponse;
-        }
-
+       
         public void SendBooksList(NetworkStream stream)       //метод для сервера
         {
             byte[] responseBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(GetBooksList()));
