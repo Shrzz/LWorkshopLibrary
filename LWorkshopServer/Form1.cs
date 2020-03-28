@@ -1,51 +1,62 @@
-﻿using Newtonsoft.Json;
+﻿using LWorkshopServer.domain;
+using Newtonsoft.Json;
 using System;
+using System.ComponentModel;
+using System.Linq;
 using System.Windows.Forms;
-
 
 namespace LWorkshopServer
 {
     public partial class Form1 : Form
     {
         Server server;
-        
+        LibraryContext context = new LibraryContext(); // отладка
+
         public Form1()
         {
             InitializeComponent();
-            server = new Server(708, this);
+            Logger.Initialize();
+            Logger.Log.ListChanged += LogChangedEventHandler;
+            server = new Server(8888);
             server.Start();
+            Logger.Log.Add("Сервер запущен на порте 8888");
+        }
+
+        private void LogChangedEventHandler(object sender, ListChangedEventArgs e)
+        {
+            rtbMain.Text += Logger.Log[e.NewIndex] + "\n";
         }
 
         private void BtnClearGrid_Click(object sender, EventArgs e)
         {
-            dgMain.DataSource = null; 
+            dgMain.DataSource = null;
             while (dgMain.Rows.Count > 0)
             {
-                dgMain.Rows.RemoveAt(dgMain.Rows.Count-1);
+                dgMain.Rows.RemoveAt(dgMain.Rows.Count - 1);
             }
         }
 
         //обработка запроса из текстбокса
         private async void BtnSendMessage_Click(object sender, EventArgs e)
         {
-            Client c = new Client(this, "127.0.0.1", 708);
-            string response = await c.SendMessage(textBox1.Text);
+            Client c = new Client(this, "127.0.0.1", 8888);
+            string response = await c.SendMessage(textBox1.Text, context.Logins.Where((l) => l.IsLibrarian == true).FirstOrDefault());
             var result = JsonConvert.DeserializeObject(response);
             dgMain.DataSource = result;
         }
 
         private async void BtnGetUsersList_Click(object sender, EventArgs e)
         {
-            Client c = new Client(this, "127.0.0.1", 708);
-            string response = await c.SendMessage("get users");
+            Client c = new Client(this, "127.0.0.1", 8888);
+            string response = await c.SendMessage("GetUser", context.Logins.Where((l) => l.IsLibrarian == true).FirstOrDefault());
             var result = JsonConvert.DeserializeObject(response);
             dgMain.DataSource = result;
         }
 
         private async void BtnGetBooksList_Click(object sender, EventArgs e)
         {
-            Client c = new Client(this, "127.0.0.1", 708);
-            string response = await c.SendMessage("get books");
+            Client c = new Client(this, "127.0.0.1", 8888);
+            string response = await c.SendMessage("GetBooks", context.Logins.Where((l) => l.IsLibrarian == true).FirstOrDefault());
             var result = JsonConvert.DeserializeObject(response);
             dgMain.DataSource = result;
         }

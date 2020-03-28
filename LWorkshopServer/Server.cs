@@ -1,40 +1,34 @@
-﻿using Newtonsoft.Json;
-using System.Collections.Generic;
+﻿using LWorkshopServer.domain;
+using Newtonsoft.Json;
 using System.Linq;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
+using static System.Text.Encoding;
 
 namespace LWorkshopServer
 {
     public class Server
     {
-        List<NetworkStream> clients = new List<NetworkStream>();
-        LibraryContext lb = new LibraryContext();
-        private Form1 formMain;
+        LibraryContext context = new LibraryContext();
         private TcpListener _listener;
         private int _port;
 
-        public Server(int port, Form1 formMain)
+        public Server(int port)
         {
             _port = port;
-            this.formMain = formMain;
         }
 
-        public async void Start(  )   //серверная часть
+        public async void Start()
         {
             _listener = TcpListener.Create(_port);
             _listener.Start();
 
-            ConsoleLogger.Write("Сервер запущен", 0, formMain);
-
             while (true)
             {
                 TcpClient client = await _listener.AcceptTcpClientAsync();
-                
-                ConsoleLogger.Write("Клиент подключился", 0, formMain);
-
-                new Thread(() => { HandleClient(client); }).Start(); 
+                //Logger.Log.Add($"new client {_listener.LocalEndpoint}");
+                new Task(() => { HandleClient(client); }).Start();
             }
         }
 
@@ -42,52 +36,74 @@ namespace LWorkshopServer
         {
             using (NetworkStream stream = client.GetStream())
             {
-                clients.Add(stream);
-
                 var buffer = new byte[1024];
-                int byteCount = 0;
+                string SRequest;
+                int byteCount;
+                Request r;
+
                 while ((byteCount = stream.Read(buffer, 0, buffer.Length)) != 0)
                 {
-                    string clientRequest = Encoding.UTF8.GetString(buffer, 0, byteCount);
+                    SRequest = UTF8.GetString(buffer, 0, byteCount);
+                    r = JsonConvert.DeserializeObject<Request>(SRequest);
 
-                    if (clientRequest.ToLower().Contains("get"))
+                    if (!isRegistered(r.Login))
                     {
-                        if (clientRequest.ToLower().Contains("book"))
-                        {
-                            SendBooksList(stream);
-                        }
-                        else
-                        {
-                            SendUsersList(stream);
-                        }
+                        client.Close();
+                        return;
                     }
-                }  
+
+                    Logger.Log.Add($"Запрос от {r.Login.Login}: {r.Query}");
+                    var response = UTF8.GetBytes(GetResponse(r.Query, r.Login.IsLibrarian));
+                    Logger.Log.Add($"Ответ {r.Login.Login}: {(UTF8.GetString(response) != "InvalidQuery")}");
+                    
+                    stream.Write(response, 0, response.Length);
+                }
+
+                client.Close();
             }
         }
 
-
-        public void SendBooksList(NetworkStream stream)       //метод для сервера
+        private bool isRegistered(UserLogin ul)
         {
-            byte[] responseBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(GetBooksList()));
-            stream.Write(responseBytes, 0, responseBytes.Length);      //был асинхронным
-            ConsoleLogger.Write($"Отправлен список книг", 0, formMain);
+            foreach (var login in context.Logins)
+            {
+                if (ul.canLogin(ul.Login, ul.Password))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
-        public void SendUsersList(NetworkStream stream)           //метод для сервера
+        private string GetResponse(string query, bool isLibraryian)
         {
-            byte[] responseBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(GetUsersList()));
-            stream.Write(responseBytes, 0, responseBytes.Length);          //был асинхронным
-            ConsoleLogger.Write($"Отправлен список пользователей", 0, formMain);
+            string defaultresp = "AccessDenied";
+            string response;
+            switch (query)
+            {
+                case "GetBooks":
+                    response = GetBooks();
+                    break;
+                case "GetUsers":
+                    response = isLibraryian ? GetUsers() : defaultresp;
+                    break;
+                default:
+                    response = "InvalidQuery";
+                    break;
+            }
+
+            return response;
         }
 
-        public List<User> GetUsersList()
+        public string GetUsers()
         {
-            return lb.Users.ToList();
+            return JsonConvert.SerializeObject(context.Users.ToList());
         }
 
-        public List<Book> GetBooksList()
+        public string GetBooks()
         {
-            return lb.Books.ToList();
+            return JsonConvert.SerializeObject(context.Books.ToList());
         }
 
         public void Close()

@@ -64,6 +64,8 @@
     <Compile Include="Client.cs" />
     <Compile Include="ConsoleLogger.cs" />
     <Compile Include="domain\Book.cs" />
+    <Compile Include="domain\Logger.cs" />
+    <Compile Include="domain\Request.cs" />
     <Compile Include="domain\UserLogin.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>

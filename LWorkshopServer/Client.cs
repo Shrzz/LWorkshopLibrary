@@ -5,8 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
-
-
+using LWorkshopServer.domain;
+using Newtonsoft.Json;
 
 namespace LWorkshopServer
 {
@@ -24,23 +24,24 @@ namespace LWorkshopServer
         }
          
 
-        public async Task<string> SendMessage(string query)          //клиентская часть
+        public async Task<string> SendMessage(string query, UserLogin login)          //клиентская часть
         {
             string serverResponse = "";
             using (var client = new TcpClient())
             {
-                ConsoleLogger.Write("Подключение к серверу", 1, formMain);
+
                 await client.ConnectAsync(_ip, _port);
-                ConsoleLogger.Write("Успешно подключён", 1, formMain);
-                byte[] byteQuery = Encoding.UTF8.GetBytes(query);
+
+                Request r = new Request() { Query = query, Login = login};
+                byte[] byteQuery = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(r));
+                
                 using (var networkStream = client.GetStream())
                 {
-                    ConsoleLogger.Write("Oтправка сообщения", 1, formMain);
                     await networkStream.WriteAsync(byteQuery, 0, byteQuery.Length);
-                    var buffer = new byte[2048];
+                    var buffer = new byte[1024];
                     var byteCount = await networkStream.ReadAsync(buffer, 0, buffer.Length);
                     serverResponse = Encoding.UTF8.GetString(buffer, 0, byteCount);
-                    ConsoleLogger.Write("Oтвет убил: " + Encoding.UTF8.GetString(buffer, 0, byteCount), 1, formMain);
+                    Logger.Log.Add($"Ответ получен : {login.Login}");
                 }
             }
             return serverResponse;

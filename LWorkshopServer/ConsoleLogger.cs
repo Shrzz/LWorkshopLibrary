@@ -19,7 +19,6 @@ namespace LWorkshopServer
             {
                 form.rtbMain.Text += $"{DateTime.Now.ToLongTimeString()}: {message}\n";
             }
-
         }
     }
 }

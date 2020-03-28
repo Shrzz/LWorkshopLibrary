@@ -11,7 +11,7 @@ namespace LWorkshopServer.domain
         public int Id { get; set; }
         public string Login { get; set; }
         public string Password { get; set; }
-        public bool IsLibraryian { get; set; }
+        public bool IsLibrarian { get; set; }
         public User User { get; set; }
 
         public bool canLogin(string login, string password)
