@@ -1,51 +1,58 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 
 namespace LWorkshopServer
 {
     public class Server
     {
+        List<NetworkStream> clients = new List<NetworkStream>();
         LibraryContext lb = new LibraryContext();
         private Form1 formMain;
         private TcpListener _listener;
-        private string _ip;
         private int _port;
 
-        public Server(string ip, int port, Form1 formMain)
+        public Server(int port, Form1 formMain)
         {
-            _ip = ip;
             _port = port;
             this.formMain = formMain;
         }
 
-        public async void Start()   //серверная часть
+        public async void Start(  )   //серверная часть
         {
             _listener = TcpListener.Create(_port);
             _listener.Start();
+
             ConsoleLogger.Write("Сервер запущен", 0, formMain);
 
             while (true)
             {
                 TcpClient client = await _listener.AcceptTcpClientAsync();
+                
                 ConsoleLogger.Write("Клиент подключился", 0, formMain);
-                using (NetworkStream stream = client.GetStream())
+
+                new Thread(() => { HandleClient(client); }).Start(); 
+            }
+        }
+
+        public void HandleClient(TcpClient client)
+        {
+            using (NetworkStream stream = client.GetStream())
+            {
+                clients.Add(stream);
+
+                var buffer = new byte[1024];
+                int byteCount = 0;
+                while ((byteCount = stream.Read(buffer, 0, buffer.Length)) != 0)
                 {
-                    var buffer = new byte[1024];
-                    ConsoleLogger.Write("Получает информацию от клиента", 0, formMain);
-                    var byteCount = await stream.ReadAsync(buffer, 0, buffer.Length);
                     string clientRequest = Encoding.UTF8.GetString(buffer, 0, byteCount);
-                    ConsoleLogger.Write($"Клиент отправил сообщение '{clientRequest}'", 0, formMain);
 
-                    //обработчик запроса сюды//
-
-                    if (clientRequest.Contains("get"))
+                    if (clientRequest.ToLower().Contains("get"))
                     {
-                        if (clientRequest.Contains("book"))
+                        if (clientRequest.ToLower().Contains("book"))
                         {
                             SendBooksList(stream);
                         }
@@ -54,11 +61,11 @@ namespace LWorkshopServer
                             SendUsersList(stream);
                         }
                     }
-                }
+                }  
             }
         }
 
-       
+
         public void SendBooksList(NetworkStream stream)       //метод для сервера
         {
             byte[] responseBytes = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(GetBooksList()));

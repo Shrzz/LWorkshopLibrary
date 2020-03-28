@@ -21,9 +21,8 @@ namespace LWorkshopServer
             this.formMain = formMain;
             _ip = IPAddress.Parse(ip);
             _port = port;
-
         }
-
+         
 
         public async Task<string> SendMessage(string query)          //клиентская часть
         {
@@ -46,6 +45,5 @@ namespace LWorkshopServer
             }
             return serverResponse;
         }
-
     }
 }

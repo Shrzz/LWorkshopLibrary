@@ -4,15 +4,58 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Data.Entity;
+using LWorkshopServer.domain;
 
 namespace LWorkshopServer
 {
-    class LibraryContext : DbContext
+    public class LibraryContext : DbContext
     {
-        public LibraryContext() : base("DbConnection")
+        DbSet<Book> books;
+        DbSet<User> users;
+        DbSet<Issuance> issuances;
+        DbSet<UserLogin> logins;
+
+        public LibraryContext() : base("DBConnectionString")
         {
         }
-        public DbSet<User> Users { get; set; }
-        public DbSet<Book> Books { get; set; }
+
+        public DbSet<Book> Books
+        {
+            set
+            {
+                books = value;
+            }
+            get
+            {
+                return books;
+            }
+        }
+        public DbSet<User> Users
+        {
+            set
+            {
+                users = value;
+            }
+            get
+            {
+                return users;
+            }
+        }
+        public DbSet<Issuance> Issuances
+        {
+            set
+            {
+                issuances = value;
+            }
+            get
+            {
+                return issuances;
+            }
+        }
+        public DbSet<UserLogin> Logins
+        {
+            get => logins;
+            set => logins = value;
+        }
     }
 }
