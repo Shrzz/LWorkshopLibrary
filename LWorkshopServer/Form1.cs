@@ -1,6 +1,7 @@
 ﻿using LWorkshopServer.domain;
 using Newtonsoft.Json;
 using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows.Forms;
@@ -24,7 +25,14 @@ namespace LWorkshopServer
 
         private void LogChangedEventHandler(object sender, ListChangedEventArgs e)
         {
-            rtbMain.Text += Logger.Log[e.NewIndex] + "\n";
+            try
+            {
+                rtbMain.Text += Logger.Log[e.NewIndex] + "\n";
+            }
+            catch (Exception ex)
+            {
+                
+            }
         }
 
         private void BtnClearGrid_Click(object sender, EventArgs e)
@@ -48,8 +56,8 @@ namespace LWorkshopServer
         private async void BtnGetUsersList_Click(object sender, EventArgs e)
         {
             Client c = new Client(this, "127.0.0.1", 8888);
-            string response = await c.SendMessage("GetUser", context.Logins.Where((l) => l.IsLibrarian == true).FirstOrDefault());
-            var result = JsonConvert.DeserializeObject(response);
+            string response = await c.SendMessage("GetUsers", context.Logins.Where((l) => l.IsLibrarian == true).FirstOrDefault());
+            var result = JsonConvert.DeserializeObject<ObservableCollection<UserForGrid>>(response);
             dgMain.DataSource = result;
         }
 

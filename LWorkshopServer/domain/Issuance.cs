@@ -8,7 +8,6 @@ namespace LWorkshopServer
         public DateTime IssuanceDate { set; get; }
         public DateTime Deadline { set; get; }
         public virtual Book Book { set; get; }
-        public virtual User User { set; get; }
 
         public bool IsDebt()
         {

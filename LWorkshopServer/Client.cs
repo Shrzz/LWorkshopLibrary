@@ -22,7 +22,6 @@ namespace LWorkshopServer
             _ip = IPAddress.Parse(ip);
             _port = port;
         }
-         
 
         public async Task<string> SendMessage(string query, UserLogin login)          //клиентская часть
         {
