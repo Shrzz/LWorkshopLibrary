@@ -28,7 +28,6 @@ namespace LWorkshopServer
             string serverResponse = "";
             using (var client = new TcpClient())
             {
-
                 await client.ConnectAsync(_ip, _port);
 
                 Request r = new Request() { Query = query, Login = login};

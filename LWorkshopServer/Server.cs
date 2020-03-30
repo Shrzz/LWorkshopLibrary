@@ -9,7 +9,13 @@ using System.Net.Sockets;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Net;
 using static System.Text.Encoding;
+
+//пофиксить логгер
+//уведомление всех пользователей об изменении списка книг
+//динамический буфер
+
 
 namespace LWorkshopServer
 {
@@ -18,58 +24,63 @@ namespace LWorkshopServer
         static LibraryContext context = new LibraryContext();
         private TcpListener _listener;
         private int _port;
+        private IPEndPoint serverIP;
+
+        private List<TcpClient> clients;
 
         public Server(int port)
         {
             _port = port;
+            serverIP = new IPEndPoint(IPAddress.Parse("127.0.0.1"), _port);
         }
 
-        public async void Start()
+        public void Start()
         {
-            _listener = TcpListener.Create(_port);
-            _listener.Start();
+            //_listener = TcpListener.Create(_port);
+           // _listener.Start();
 
+            SocketString listener = new SocketString(new Socket(SocketType.Stream, ProtocolType.Tcp));
+            listener.Bind(serverIP);
+            listener.Listen(10);
             while (true)
             {
-                TcpClient client = await _listener.AcceptTcpClientAsync();
-                Logger.Log.Add($"new client {_listener.LocalEndpoint}");
-                new Task(new ClientHandler(client).Run).Start();
+                SocketString handler =  listener.Accept();
+                
+                //TcpClient client = await _listener.AcceptTcpClientAsync();
+                Logger.Log.Add($"new client {handler.RemoteEndPoint}");
+                new Task(new ClientHandler(handler).Run).Start();
             }
         }
 
         class ClientHandler 
         {
-            TcpClient client;
+            SocketString handler;
             byte[] buffer = new byte[1048576];
             string SRequest;
             int byteCount;
             Request r;
 
-            public ClientHandler(TcpClient client)
+            public ClientHandler(SocketString handler)
             {
-                this.client = client;
+                this.handler = handler;
             }
 
             public void Run()
-            {
-                using (NetworkStream stream = client.GetStream())
-                {
-                    while ((byteCount = stream.Read(buffer, 0, buffer.Length)) != 0)
+            { 
+                    while ((SRequest = handler.Receive()).Length != 0)
                     {
-                        SRequest = UTF8.GetString(buffer, 0, byteCount);
                         r = JsonConvert.DeserializeObject<Request>(SRequest);
 
                         Logger.Log.Add($"Запрос от {r.Login.Login}: {r.Query}");
                         var rsp = GetResponse(r);
 
-                        var response = UTF8.GetBytes(rsp);
-                        Logger.Log.Add($"Ответ {r.Login.Login}: {(UTF8.GetString(response) != "InvalidQuery")}");
+                        Logger.Log.Add($"Ответ {r.Login.Login}: {(rsp != "InvalidQuery")}");
 
-                        stream.Write(response, 0, response.Length);
+                        handler.Send(rsp);
+                    
                     }
-
-                    client.Close();
-                }
+                handler.Shutdown(SocketShutdown.Both);
+                handler.Close();
             }
 
             private static bool isRegistered(UserLogin ul)

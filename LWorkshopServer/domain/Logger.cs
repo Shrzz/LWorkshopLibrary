@@ -11,15 +11,18 @@ namespace LWorkshopServer.domain
     public static class Logger
     {
         private static bool isInitialized;
-
-        public static BindingList<string> Log { get; private set; }
-        
-        public static void Initialize()
+        private static BindingList<string> log = new BindingList<string>();
+        public static BindingList<string> Log 
         {
-            if (isInitialized)
-                return;
-
-            Log = new BindingList<string>();
+            get
+            {
+                lock (log)
+                {
+                    return log;
+                }
+                
+            }
         }
+        
     }
 }

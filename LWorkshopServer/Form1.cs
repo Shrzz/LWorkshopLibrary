@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Windows.Forms;
+using System.Threading;
 
 namespace LWorkshopServer
 {
@@ -16,10 +17,13 @@ namespace LWorkshopServer
         public Form1()
         {
             InitializeComponent();
-            Logger.Initialize();
             Logger.Log.ListChanged += LogChangedEventHandler;
-            server = new Server(8888);
-            server.Start();
+            new Thread(() =>
+            {
+                server = new Server(8888);
+                server.Start();
+            }).Start();
+            
             Logger.Log.Add("Сервер запущен на порте 8888");
         }
 
