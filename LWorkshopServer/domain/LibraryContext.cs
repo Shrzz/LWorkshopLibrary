@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Data.Entity;
 using LWorkshopServer.domain;
+using System.ComponentModel.DataAnnotations;
 
 namespace LWorkshopServer
 {
@@ -17,8 +18,10 @@ namespace LWorkshopServer
 
         public LibraryContext() : base("DBConnectionString")
         {
+            
         }
 
+        [ConcurrencyCheck]
         public DbSet<Book> Books
         {
             set
@@ -30,6 +33,8 @@ namespace LWorkshopServer
                 return books;
             }
         }
+
+        [ConcurrencyCheck]
         public DbSet<User> Users
         {
             set
@@ -41,6 +46,7 @@ namespace LWorkshopServer
                 return users;
             }
         }
+        [ConcurrencyCheck]
         public DbSet<Issuance> Issuances
         {
             set

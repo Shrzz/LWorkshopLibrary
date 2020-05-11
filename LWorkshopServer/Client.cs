@@ -15,6 +15,8 @@ namespace LWorkshopServer
         private Form1 formMain;
         private IPAddress _ip;
         private int _port;
+        private LibraryContext context = new LibraryContext();
+
 
         public Client(Form1 formMain, string ip, int port)
         {

@@ -8,9 +8,8 @@ using System.Threading.Tasks;
 
 namespace LWorkshopServer.domain
 {
-    public static class Logger
+    public static class Logger 
     {
-        private static bool isInitialized;
         private static BindingList<string> log = new BindingList<string>();
         public static BindingList<string> Log 
         {

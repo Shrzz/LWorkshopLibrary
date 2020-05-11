@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Windows.Forms;
 using System.Threading;
+using System.Collections.Generic;
 
 namespace LWorkshopServer
 {
@@ -13,6 +14,8 @@ namespace LWorkshopServer
     {
         Server server;
         LibraryContext context = new LibraryContext(); // отладка
+        List<Client> clients = new List<Client>();
+        
 
         public Form1()
         {
@@ -36,6 +39,7 @@ namespace LWorkshopServer
             catch (Exception ex)
             {
                 
+                //MessageBox.Show("При попытки записи в лог произошла ошибка","Log error");
             }
         }
 
@@ -48,10 +52,13 @@ namespace LWorkshopServer
             }
         }
 
-        //обработка запроса из текстбокса
         private async void BtnSendMessage_Click(object sender, EventArgs e)
         {
             Client c = new Client(this, "127.0.0.1", 8888);
+            if (!clients.Contains(c))
+            {
+                clients.Add(c);
+            }
             string response = await c.SendMessage(textBox1.Text, context.Logins.Where((l) => l.IsLibrarian == true).FirstOrDefault());
             var result = JsonConvert.DeserializeObject(response);
             dgMain.DataSource = result;
@@ -60,6 +67,10 @@ namespace LWorkshopServer
         private async void BtnGetUsersList_Click(object sender, EventArgs e)
         {
             Client c = new Client(this, "127.0.0.1", 8888);
+            if (!clients.Contains(c))
+            {
+                clients.Add(c);
+            }
             string response = await c.SendMessage("GetUsers", context.Logins.Where((l) => l.IsLibrarian == true).FirstOrDefault());
             var result = JsonConvert.DeserializeObject<ObservableCollection<UserForGrid>>(response);
             dgMain.DataSource = result;
@@ -68,6 +79,7 @@ namespace LWorkshopServer
         private async void BtnGetBooksList_Click(object sender, EventArgs e)
         {
             Client c = new Client(this, "127.0.0.1", 8888);
+
             string response = await c.SendMessage("GetBooks", context.Logins.Where((l) => l.IsLibrarian == true).FirstOrDefault());
             var result = JsonConvert.DeserializeObject(response);
             dgMain.DataSource = result;

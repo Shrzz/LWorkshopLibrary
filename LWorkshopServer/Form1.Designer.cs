@@ -67,6 +67,8 @@
             // 
             // dgMain
             // 
+            this.dgMain.AllowUserToAddRows = false;
+            this.dgMain.AllowUserToDeleteRows = false;
             this.dgMain.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgMain.Location = new System.Drawing.Point(548, 99);
             this.dgMain.Name = "dgMain";

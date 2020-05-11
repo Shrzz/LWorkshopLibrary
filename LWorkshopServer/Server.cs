@@ -3,18 +3,16 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Data;
 using System.Data.Entity;
 using System.Linq;
+using System.Net;
 using System.Net.Sockets;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Net;
-using static System.Text.Encoding;
 
 //пофиксить логгер
 //уведомление всех пользователей об изменении списка книг
-//динамический буфер
 
 
 namespace LWorkshopServer
@@ -26,6 +24,7 @@ namespace LWorkshopServer
         private int _port;
         private IPEndPoint serverIP;
 
+
         private List<TcpClient> clients;
 
         public Server(int port)
@@ -36,23 +35,21 @@ namespace LWorkshopServer
 
         public void Start()
         {
-            //_listener = TcpListener.Create(_port);
-           // _listener.Start();
-
             SocketString listener = new SocketString(new Socket(SocketType.Stream, ProtocolType.Tcp));
             listener.Bind(serverIP);
             listener.Listen(10);
+
+
+
             while (true)
             {
-                SocketString handler =  listener.Accept();
-                
-                //TcpClient client = await _listener.AcceptTcpClientAsync();
+                SocketString handler = listener.Accept();
                 Logger.Log.Add($"new client {handler.RemoteEndPoint}");
                 new Task(new ClientHandler(handler).Run).Start();
             }
         }
 
-        class ClientHandler 
+        class ClientHandler
         {
             SocketString handler;
             byte[] buffer = new byte[1048576];
@@ -66,19 +63,19 @@ namespace LWorkshopServer
             }
 
             public void Run()
-            { 
-                    while ((SRequest = handler.Receive()).Length != 0)
-                    {
-                        r = JsonConvert.DeserializeObject<Request>(SRequest);
+            {
+                while ((SRequest = handler.Receive()).Length != 0)
+                {
+                    r = JsonConvert.DeserializeObject<Request>(SRequest);
 
-                        Logger.Log.Add($"Запрос от {r.Login.Login}: {r.Query}");
-                        var rsp = GetResponse(r);
+                    Logger.Log.Add($"Запрос от {r.Login.Login}: {r.Query}");
+                    var rsp = GetResponse(r);
 
-                        Logger.Log.Add($"Ответ {r.Login.Login}: {(rsp != "InvalidQuery")}");
+                    Logger.Log.Add($"Ответ {r.Login.Login}: {(rsp != "InvalidQuery")}");
 
-                        handler.Send(rsp);
-                    
-                    }
+                    handler.Send(rsp);
+
+                }
                 handler.Shutdown(SocketShutdown.Both);
                 handler.Close();
             }
@@ -113,7 +110,7 @@ namespace LWorkshopServer
                     case "Login":
                         string login = Regex.Match(query, "\\|.+\\|").Value;
                         string pass = Regex.Match(query, "\\|.+?$", RegexOptions.RightToLeft).Value;
-                        response = Login(login.Substring(1, login.Length-2) , pass.Substring(1));
+                        response = Login(login.Substring(1, login.Length - 2), pass.Substring(1));
                         break;
                     case "GetBooks":
                         response = isReg ? GetBooks() : defaultresp;
@@ -128,8 +125,8 @@ namespace LWorkshopServer
                         response = isLib ? DelBook(int.Parse(num.Match(query).Value)) : defaultresp;
                         break;
                     case "AddBook":
-                        response = isLib 
-                            ? AddBook(JsonConvert.DeserializeObject<Book>(json.Match(query).Value)) 
+                        response = isLib
+                            ? AddBook(JsonConvert.DeserializeObject<Book>(json.Match(query).Value))
                             : defaultresp;
                         break;
                     case "AddUser":
@@ -156,7 +153,7 @@ namespace LWorkshopServer
                 return response;
             }
         }
-        
+
         public static string Login(string login, string pass)
         {
             bool flag = false;
@@ -281,7 +278,9 @@ namespace LWorkshopServer
 
         public static string GetBooks()
         {
+
             return JsonConvert.SerializeObject(context.Books.ToList());
+
         }
 
         private static ObservableCollection<UserForGrid> LoadUsers()
@@ -311,6 +310,7 @@ namespace LWorkshopServer
 
         public void Close()
         {
+            //SqlDependency.Stop(System.Configuration.ConfigurationManager.ConnectionStrings["DBConnectionString"].ConnectionString);
             _listener.Stop();
         }
     }
